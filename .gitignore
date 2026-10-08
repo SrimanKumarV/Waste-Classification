@@ -1,0 +1,68 @@
+# ==========================================
+# Python & Environment ignores
+# ==========================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+myenv/
+imageclassification/
+Webpage/myenv/
+*/myenv/
+*/venv/
+*/env/
+ENV/
+env.bak/
+venv.bak/
+
+# Jupyter Notebook checkpoints
+.ipynb_checkpoints/
+.virtual_documents/
+
+# Logs & Debugging
+logs/
+*.log
+
+# ==========================================
+# Large Trained Models & Weights (>100MB)
+# ==========================================
+*.h5
+*.hdf5
+*.keras
+*.pth
+*.pt
+*.onnx
+*.pb
+*.tflite
+models/
+Webpage/*.h5
+
+# Keep specific lightweight model files if needed
+!tamil_dialect_text_model.pkl
+
+# ==========================================
+# Datasets & Large Archives (>100MB / raw datasets)
+# ==========================================
+*.zip
+*.tar
+*.tar.gz
+*.rar
+*.7z
+
+data/
+data1/
+train/
+Train-*/
+audio/
+audio_samples/
+
+# ==========================================
+# OS & IDE Files
+# ==========================================
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/

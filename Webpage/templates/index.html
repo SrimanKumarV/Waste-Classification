@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Waste Classifier</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700&display=swap" rel="stylesheet">
+<style>
+/* General Dark Mode */
+body {
+    margin: 0;
+    font-family: 'Orbitron', sans-serif;
+    background: radial-gradient(circle at top left, #0f0c29, #302b63, #24243e);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    min-height: 100vh;
+    justify-content: center;
+}
+
+h1 {
+    font-size: 3em;
+    text-align: center;
+    color: #00fff7;
+    text-shadow: 0 0 10px #00fff7, 0 0 20px #0077ff;
+}
+
+.file-upload-wrapper {
+    position: relative;
+    margin: 20px auto;
+}
+
+.file-upload-label {
+    display: block;
+    width: 250px;
+    background: linear-gradient(90deg, #00fff7, #0077ff);
+    color: #111;
+    text-align: center;
+    padding: 12px 0;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    transition: 0.3s ease;
+    box-shadow: 0 0 10px #00fff7, 0 0 20px #0077ff;
+}
+
+.file-upload-label:hover {
+    background: linear-gradient(90deg, #0077ff, #00fff7);
+    box-shadow: 0 0 20px #00fff7, 0 0 40px #0077ff;
+}
+
+input[type="file"] {
+    display: none;
+}
+
+button {
+    display: block;             /* Make it a block element */
+    margin: 40px auto 0 auto;   /* Top margin increased to 40px, horizontally centered */
+    background: #00fff7;
+    color: #111;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 12px;
+    font-weight: bold;
+    cursor: pointer;
+    box-shadow: 0 0 10px #00fff7, 0 0 20px #0077ff;
+    transition: 0.3s;
+}
+
+button:hover {
+    background: linear-gradient(90deg, #0077ff, #00fff7);
+    color: #fff;
+    box-shadow: 0 0 20px #00fff7, 0 0 40px #0077ff;
+}
+
+img#preview {
+    margin-top: 20px;
+    max-width: 300px;
+    border-radius: 12px;
+    box-shadow: 0 0 10px #00fff7, 0 0 20px #0077ff;
+}
+
+.prediction {
+    margin-top: 20px;
+    font-size: 1.5em;
+    text-align: center;
+    text-shadow: 0 0 5px #00ff99, 0 0 10px #00ff99;
+}
+
+/* Color coding for dustbins */
+.bin-blue {
+    color: #00aaff;
+}
+.bin-green {
+    color: #00ff99;
+}
+.bin-red {
+    color: #ff4444;
+}
+</style>
+</head>
+<body>
+<h1>Waste Classification</h1>
+
+<form action="/predict" method="POST" enctype="multipart/form-data">
+    <div class="file-upload-wrapper">
+        <label class="file-upload-label" for="fileInput">Choose an Image</label>
+        <input type="file" id="fileInput" name="file" accept="image/*" required onchange="previewFile(event)">
+    </div>
+    <button type="submit">Predict</button>
+</form>
+
+<img id="preview" src="">
+
+<div class="prediction">
+    {% if prediction %}
+        Predicted Class: <strong>{{ prediction }}</strong><br>
+        Confidence: <strong>{{ confidence }}</strong><br>
+        Suggested Bin: 
+        {% if "Blue" in dustbin %}
+            <span class="bin-blue">{{ dustbin }}</span>
+        {% elif "Green" in dustbin %}
+            <span class="bin-green">{{ dustbin }}</span>
+        {% elif "Red" in dustbin %}
+            <span class="bin-red">{{ dustbin }}</span>
+        {% else %}
+            {{ dustbin }}
+        {% endif %}
+    {% endif %}
+</div>
+
+<script>
+function previewFile(event) {
+    const preview = document.getElementById('preview');
+    const file = event.target.files[0];
+    if(file) {
+        const reader = new FileReader();
+        reader.onload = function() {
+            preview.src = reader.result;
+        }
+        reader.readAsDataURL(file);
+    }
+}
+</script>
+</body>
+</html>
