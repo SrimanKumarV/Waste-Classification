@@ -1,0 +1,612 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Waste Segregation Analytics — Academic Decision-Support Platform</title>
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+  <!-- Sidebar -->
+  <aside class="app-sidebar">
+    <div class="sidebar-header">
+      <div class="brand-icon">♻️</div>
+      <div>
+        <div class="brand-title">SmartWaste AI</div>
+        <div class="brand-badge">SDG 7 • IoT AUDIT</div>
+      </div>
+    </div>
+
+    <nav class="sidebar-nav">
+      <a class="nav-item active" data-tab="overview">
+        <span class="icon">📊</span>
+        <span>Overview & KPIs</span>
+      </a>
+      <a class="nav-item" data-tab="scanner">
+        <span class="icon">📷</span>
+        <span>Scan & Audit Waste</span>
+      </a>
+      <a class="nav-item" data-tab="analytics">
+        <span class="icon">🗺️</span>
+        <span>Campus Heatmap</span>
+      </a>
+      <a class="nav-item" data-tab="iot">
+        <span class="icon">📡</span>
+        <span>IoT Bin Monitoring</span>
+      </a>
+      <a class="nav-item" data-tab="predictions">
+        <span class="icon">📈</span>
+        <span>Predictive Analytics</span>
+      </a>
+      <a class="nav-item" data-tab="recommendations">
+        <span class="icon">💡</span>
+        <span>Decision Support</span>
+      </a>
+      <a class="nav-item" data-tab="energy">
+        <span class="icon">⚡</span>
+        <span>SDG 7 Clean Energy</span>
+      </a>
+      <a class="nav-item" data-tab="evaluation">
+        <span class="icon">🔬</span>
+        <span>Model Evaluation</span>
+      </a>
+      <a class="nav-item" data-tab="simulator">
+        <span class="icon">🕹️</span>
+        <span>IoT Simulator</span>
+      </a>
+      <a class="nav-item" href="/mobile" target="_blank" style="margin-top:auto; border-top:1px solid var(--border-subtle); padding-top:12px;">
+        <span class="icon">📱</span>
+        <span>Mobile App View</span>
+      </a>
+    </nav>
+
+    <div class="sidebar-footer">
+      <div>Prototype v2.0 • Academic Build</div>
+      <div style="color:var(--text-secondary); margin-top:2px;">FastAPI + TensorFlow + IoT</div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="app-main">
+    
+    <!-- Topbar -->
+    <header class="topbar">
+      <div class="topbar-left">
+        <h2 class="topbar-title" id="page-title">Operational Overview & KPIs</h2>
+      </div>
+      <div class="topbar-right">
+        <div class="status-indicator">
+          <div class="pulse-dot"></div>
+          <span>IoT Mesh Active</span>
+        </div>
+        <a href="/api/reports/export-csv" class="btn btn-outline" download>
+          <span>📥 Export CSV</span>
+        </a>
+        <button class="btn btn-primary" onclick="switchTab('scanner')">
+          <span>+ Audit Item</span>
+        </button>
+      </div>
+    </header>
+
+    <!-- Page Body -->
+    <div class="page-container">
+
+      <!-- ================= TAB 1: OVERVIEW ================= -->
+      <section class="tab-section active" id="tab-overview">
+        <div class="section-header">
+          <h3 class="section-title">Source Segregation Analytics</h3>
+          <p class="section-desc">Auditing efficiency, contamination tracking, and smart campus waste intelligence.</p>
+        </div>
+
+        <!-- KPI Grid -->
+        <div class="kpi-grid">
+          <div class="kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Segregation Efficiency</span>
+              <span class="kpi-icon">🎯</span>
+            </div>
+            <div class="kpi-value" id="kpi-efficiency">--%</div>
+            <div class="kpi-footer">Target: > 85% campus-wide</div>
+          </div>
+
+          <div class="kpi-card amber">
+            <div class="kpi-header">
+              <span class="kpi-label">Contamination Rate</span>
+              <span class="kpi-icon">⚠️</span>
+            </div>
+            <div class="kpi-value" id="kpi-contamination" style="color:var(--color-warning);">--%</div>
+            <div class="kpi-footer">Misplaced waste items</div>
+          </div>
+
+          <div class="kpi-card blue">
+            <div class="kpi-header">
+              <span class="kpi-label">Total Audited Items</span>
+              <span class="kpi-icon">📦</span>
+            </div>
+            <div class="kpi-value" id="kpi-audits">--</div>
+            <div class="kpi-footer">Verified disposal events</div>
+          </div>
+
+          <div class="kpi-card red">
+            <div class="kpi-header">
+              <span class="kpi-label">Critical Bins (>90%)</span>
+              <span class="kpi-icon">🚨</span>
+            </div>
+            <div class="kpi-value" id="kpi-critical-bins" style="color:var(--color-hazardous);">--</div>
+            <div class="kpi-footer">Require immediate emptying</div>
+          </div>
+
+          <div class="kpi-card purple">
+            <div class="kpi-header">
+              <span class="kpi-label">Model Avg Confidence</span>
+              <span class="kpi-icon">🧠</span>
+            </div>
+            <div class="kpi-value" id="kpi-confidence">--%</div>
+            <div class="kpi-footer">Inference quality metric</div>
+          </div>
+        </div>
+
+        <!-- Charts Grid -->
+        <div class="grid-2">
+          <div class="card">
+            <div class="card-title">
+              <span>Segregation Efficiency Trend (14 Days)</span>
+              <span class="badge-status status-NORMAL">Daily Aggregate</span>
+            </div>
+            <div style="height: 280px; position: relative;">
+              <canvas id="trend-chart"></canvas>
+            </div>
+          </div>
+
+          <div class="card">
+            <div class="card-title">
+              <span>Waste Classification Distribution</span>
+              <span class="badge-status status-MODERATE">12 Classes</span>
+            </div>
+            <div style="height: 280px; position: relative;">
+              <canvas id="category-chart"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Audits Table -->
+        <div class="card">
+          <div class="card-title">
+            <span>Recent Audits & Disposals</span>
+            <button class="btn btn-outline" style="font-size:0.75rem;" onclick="loadRecentAuditsTable()">Refresh</button>
+          </div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Audit ID</th>
+                  <th>Item Class</th>
+                  <th>Location</th>
+                  <th>Expected Bin</th>
+                  <th>Actual Bin</th>
+                  <th>Segregation Status</th>
+                  <th>Confidence</th>
+                  <th>Inference</th>
+                </tr>
+              </thead>
+              <tbody id="recent-audits-table-body">
+                <tr><td colspan="8" style="text-align:center;">Loading audit telemetry...</td></tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 2: SCANNER & AUDITOR ================= -->
+      <section class="tab-section" id="tab-scanner">
+        <div class="section-header">
+          <h3 class="section-title">Waste Image Classifier & Source Auditor</h3>
+          <p class="section-desc">Classifies waste into 12 categories, evaluates Expected vs Actual bin, and logs segregation audits.</p>
+        </div>
+
+        <div class="scanner-container">
+          <!-- Left: Upload & Camera -->
+          <div class="card">
+            <div class="card-title">Upload Item Image</div>
+            
+            <div class="dropzone-box" id="dropzone">
+              <div class="dropzone-icon">📷</div>
+              <p><strong>Click to upload</strong> or drag and drop waste image</p>
+              <p style="font-size:0.8rem; color:var(--text-secondary); margin-top:4px;">Supports JPG, PNG, WEBP (Evaluated at 256x256)</p>
+              <input type="file" id="waste-file-input" accept="image/*" style="display:none;">
+            </div>
+
+            <div class="preview-container" id="preview-container" style="display:none;">
+              <img id="scanner-preview" class="preview-img" alt="Uploaded waste preview">
+            </div>
+
+            <div style="margin-top:16px;">
+              <label style="font-size:0.8rem; color:var(--text-secondary); display:block; margin-bottom:4px;">
+                Uncertainty Confidence Threshold:
+              </label>
+              <div style="display:flex; gap:10px; align-items:center;">
+                <input type="range" id="confidence-threshold-input" min="0.5" max="0.95" step="0.05" value="0.70" style="flex:1;">
+                <span id="threshold-val-display" style="font-weight:600; font-size:0.85rem;">70%</span>
+              </div>
+            </div>
+
+            <div id="scanner-loading" style="display:none; text-align:center; padding:20px; color:var(--accent-primary);">
+              <div>🧠 Running Deep Learning Classification + Grad-CAM...</div>
+            </div>
+          </div>
+
+          <!-- Right: Classification Outcome & Confirmation -->
+          <div>
+            <div class="audit-panel" id="scanner-result" style="display:none;">
+              <div style="display:flex; justify-content:space-between; align-items:flex-start;">
+                <div>
+                  <span class="result-badge badge-recyclable" id="res-category">RECYCLABLE</span>
+                  <h2 style="font-size:2rem; font-weight:700;" id="res-waste-type">PLASTIC</h2>
+                </div>
+                <div style="text-align:right;">
+                  <div style="font-size:1.4rem; font-weight:700; color:var(--accent-primary);" id="res-confidence">94.6%</div>
+                  <div style="font-size:0.75rem; color:var(--text-muted);">Confidence Score</div>
+                </div>
+              </div>
+
+              <!-- Confidence bar -->
+              <div class="progress-bar-bg" style="margin:12px 0;">
+                <div class="progress-bar-fill" id="res-conf-bar" style="width:0%; background-color:var(--accent-primary);"></div>
+              </div>
+
+              <div id="low-conf-warning" style="display:none; background:rgba(245, 158, 11, 0.15); border:1px solid #f59e0b; color:#f59e0b; padding:10px; border-radius:6px; font-size:0.82rem; margin-bottom:12px;"></div>
+
+              <!-- Recommended Bin -->
+              <div class="bin-recommendation-box" id="res-bin-box">
+                <span class="bin-icon-large">🗑️</span>
+                <div>
+                  <div style="font-size:0.75rem; text-transform:uppercase; letter-spacing:0.04em;">SYSTEM RECOMMENDATION</div>
+                  <strong style="font-size:1.15rem;" id="res-bin-name">Recyclable (Blue Bin)</strong>
+                </div>
+              </div>
+
+              <!-- Grad-CAM Box -->
+              <div class="gradcam-view" id="gradcam-container" style="display:none;">
+                <div style="font-size:0.82rem; font-weight:600; margin-bottom:6px;">
+                  🔬 Interpretability Heatmap (Grad-CAM Activation):
+                </div>
+                <img id="gradcam-img" class="gradcam-img" alt="Grad-CAM visualization">
+                <div style="font-size:0.72rem; color:var(--text-muted); margin-top:4px;">
+                  Warm regions (red/yellow) indicate image features that most strongly influenced the neural network prediction.
+                </div>
+              </div>
+
+              <div style="display:flex; justify-content:space-between; font-size:0.75rem; color:var(--text-muted); margin-top:14px; padding-top:10px; border-top:1px solid var(--border-muted);">
+                <span>Active Model: <strong id="res-model-name">VGG16</strong></span>
+                <span>Latency: <strong id="res-latency">145 ms</strong></span>
+              </div>
+            </div>
+
+            <!-- Audit Form -->
+            <div class="card" id="audit-section" style="display:none; margin-top:16px;">
+              <h4 style="font-size:1rem; margin-bottom:10px;">Confirm Actual Bin Disposal</h4>
+              <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:12px;">
+                To audit segregation accuracy, confirm which physical bin the user placed this item into:
+              </p>
+
+              <label style="font-size:0.8rem; color:var(--text-secondary);">Audit Campus Location:</label>
+              <select id="audit-location-select" style="width:100%; padding:8px; background:var(--bg-surface-elevated); border:1px solid var(--border-muted); color:#fff; border-radius:6px; margin:6px 0 14px 0;">
+              </select>
+
+              <div class="bin-choice-group">
+                <button type="button" class="bin-choice-btn" data-bin="Recyclable (Blue Bin)" onclick="selectActualBin('Recyclable (Blue Bin)')">
+                  🟦 Blue Bin<br><small>Recyclable</small>
+                </button>
+                <button type="button" class="bin-choice-btn" data-bin="Organic (Green Bin)" onclick="selectActualBin('Organic (Green Bin)')">
+                  🟩 Green Bin<br><small>Organic</small>
+                </button>
+                <button type="button" class="bin-choice-btn" data-bin="Hazardous (Red Bin)" onclick="selectActualBin('Hazardous (Red Bin)')">
+                  🟥 Red Bin<br><small>Hazardous</small>
+                </button>
+              </div>
+
+              <button class="btn btn-primary" style="width:100%; justify-content:center; padding:12px; margin-top:10px;" onclick="submitAuditConfirmation()">
+                <span>Confirm & Record Audit</span>
+              </button>
+            </div>
+
+            <!-- Audit Outcome Feedback Card -->
+            <div id="audit-outcome" style="display:none; margin-top:16px;"></div>
+
+            <!-- User Stakeholder Feedback Rating Widget -->
+            <div class="card" id="feedback-widget" style="margin-top:16px;">
+              <div style="font-size:0.88rem; font-weight:600;">Stakeholder Usefulness Rating</div>
+              <p style="font-size:0.78rem; color:var(--text-secondary); margin:4px 0 10px 0;">
+                How helpful was this classification recommendation?
+              </p>
+              <div class="star-rating" id="star-rating-box">
+                <span class="star" onclick="submitFeedbackRating(1)">★</span>
+                <span class="star" onclick="submitFeedbackRating(2)">★</span>
+                <span class="star" onclick="submitFeedbackRating(3)">★</span>
+                <span class="star" onclick="submitFeedbackRating(4)">★</span>
+                <span class="star" onclick="submitFeedbackRating(5)">★</span>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 3: ANALYTICS & HEATMAP ================= -->
+      <section class="tab-section" id="tab-analytics">
+        <div class="section-header">
+          <h3 class="section-title">Campus Segregation Heatmap & Analytics</h3>
+          <p class="section-desc">Identifies problem locations, contamination hot-spots, and segregation compliance.</p>
+        </div>
+
+        <div class="grid-2">
+          <div>
+            <h4 style="margin-bottom:12px;">Campus Location Efficiency Ranking</h4>
+            <div id="location-heatmap-grid" style="display:flex; flex-direction:column; gap:12px;">
+              <!-- Populated by JS -->
+            </div>
+          </div>
+
+          <div>
+            <div class="card">
+              <div class="card-title">Top Misplaced Contaminants</div>
+              <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:12px;">
+                Waste types causing the highest contamination rates across organic and recyclable streams:
+              </p>
+              <div id="top-contaminants-list">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
+            <div class="card" style="margin-top:16px;">
+              <div class="card-title">Academic Problem Statement Alignment</div>
+              <div style="font-size:0.84rem; color:var(--text-secondary); line-height:1.6;">
+                <p><strong>Core Objective:</strong> Evaluate segregation efficiency at source rather than post-collection sorting.</p>
+                <p style="margin-top:8px;">
+                  Formula: <code>Efficiency = (Correctly Segregated / Total Audited) × 100</code>
+                </p>
+                <p style="margin-top:8px;">
+                  By isolating locations with poor segregation (e.g. Canteen at 49%), targeted interventions are deployed before waste mixes in transport.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 4: IOT BIN MONITORING ================= -->
+      <section class="tab-section" id="tab-iot">
+        <div class="section-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h3 class="section-title">Real-Time IoT Smart Bins</h3>
+            <p class="section-desc">Live ultrasonic fill levels, load cells, temperature, and odor/gas sensors.</p>
+          </div>
+          <div style="display:flex; gap:10px;">
+            <button class="btn btn-outline" onclick="triggerSimulateTick()">Simulate Tick</button>
+            <button class="btn btn-outline" id="auto-sim-btn" onclick="toggleAutoSimulation()">Start Auto-Simulation</button>
+          </div>
+        </div>
+
+        <div class="grid-3" id="bins-grid-container">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- ================= TAB 5: PREDICTIONS ================= -->
+      <section class="tab-section" id="tab-predictions">
+        <div class="section-header">
+          <h3 class="section-title">Predictive Analytics & Forecasting</h3>
+          <p class="section-desc">Time-series fill forecasting and segregation trend projection.</p>
+        </div>
+
+        <div id="trend-prediction-banner" style="margin-bottom:20px;"></div>
+
+        <div class="card">
+          <div class="card-title">Bin Fill Forecast & Imminent Overflow Estimates</div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Bin ID</th>
+                  <th>Current Fill</th>
+                  <th>+4 Hours</th>
+                  <th>+8 Hours</th>
+                  <th>+24 Hours</th>
+                  <th>Expected Critical Time (>90%)</th>
+                  <th>Model Accuracy</th>
+                </tr>
+              </thead>
+              <tbody id="predictions-table-body">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 6: RECOMMENDATIONS ================= -->
+      <section class="tab-section" id="tab-recommendations">
+        <div class="section-header" style="display:flex; justify-content:space-between; align-items:center;">
+          <div>
+            <h3 class="section-title">Decision-Support & Recommendations</h3>
+            <p class="section-desc">AI and rule-assisted interventions with transparent data rationales.</p>
+          </div>
+          <button class="btn btn-primary" onclick="API.generateRecommendations().then(() => loadRecommendationsData())">
+            Re-evaluate Rules
+          </button>
+        </div>
+
+        <div id="recommendations-list">
+          <!-- Populated by JS -->
+        </div>
+      </section>
+
+      <!-- ================= TAB 7: SDG 7 CLEAN ENERGY ================= -->
+      <section class="tab-section" id="tab-energy">
+        <div class="section-header">
+          <h3 class="section-title">SDG 7 — Energy-Aware Collection Planning</h3>
+          <p class="section-desc">Affordable and Clean Energy: Dynamic dispatch to eliminate unnecessary collection trips and fuel emissions.</p>
+        </div>
+
+        <div class="energy-badge">⚡ SDG 7 ALIGNED: MODELED ENERGY OPTIMIZATION</div>
+
+        <div class="kpi-grid">
+          <div class="kpi-card amber">
+            <div class="kpi-header"><span class="kpi-label">Trips Avoided / Week</span><span>🚛</span></div>
+            <div class="kpi-value" id="energy-trips-avoided">--</div>
+            <div class="kpi-footer">Unnecessary dispatch eliminated</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-header"><span class="kpi-label">Fuel Saved</span><span>⛽</span></div>
+            <div class="kpi-value" id="energy-fuel-saved">-- L</div>
+            <div class="kpi-footer">Estimated diesel reduction</div>
+          </div>
+          <div class="kpi-card blue">
+            <div class="kpi-header"><span class="kpi-label">Energy Equivalent</span><span>⚡</span></div>
+            <div class="kpi-value" id="energy-kwh-saved">-- kWh</div>
+            <div class="kpi-footer">10 kWh / Liter diesel baseline</div>
+          </div>
+          <div class="kpi-card purple">
+            <div class="kpi-header"><span class="kpi-label">CO2 Avoided</span><span>🌱</span></div>
+            <div class="kpi-value" id="energy-co2-reduced">-- kg</div>
+            <div class="kpi-footer">2.68 kg CO2 / L diesel</div>
+          </div>
+          <div class="kpi-card">
+            <div class="kpi-header"><span class="kpi-label">Efficiency Gain</span><span>📉</span></div>
+            <div class="kpi-value" id="energy-percent-reduction">--%</div>
+            <div class="kpi-footer">Operational logistics savings</div>
+          </div>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Priority Collection Sequence (Decision Support)</div>
+          <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:12px;">
+            Optimized route stops ordered by fill-level urgency and imminent capacity thresholds:
+          </p>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Sequence</th>
+                  <th>Bin ID</th>
+                  <th>Location</th>
+                  <th>Bin Type</th>
+                  <th>Fill Level</th>
+                  <th>Weight</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="route-sequence-table-body">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 8: MODEL EVALUATION ================= -->
+      <section class="tab-section" id="tab-evaluation">
+        <div class="section-header">
+          <h3 class="section-title">Academic Model & System Evaluation</h3>
+          <p class="section-desc">Empirical metrics documented from research notebooks across deep learning architectures.</p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Model Registry & Architecture Benchmark</div>
+          <div class="table-container">
+            <table>
+              <thead>
+                <tr>
+                  <th>Model Architecture</th>
+                  <th>Backbone & Layer Design</th>
+                  <th>Test Accuracy</th>
+                  <th>Precision</th>
+                  <th>Recall</th>
+                  <th>F1-Score</th>
+                  <th>Inference</th>
+                  <th>Params</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody id="model-comparison-table-body">
+                <!-- Populated by JS -->
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ================= TAB 9: IOT SIMULATOR ================= -->
+      <section class="tab-section" id="tab-simulator">
+        <div class="section-header">
+          <h3 class="section-title">IoT Hardware & Sensor Gateway Simulator</h3>
+          <p class="section-desc">Demonstrate hardware telemetry streaming without requiring physical ESP32 devices.</p>
+        </div>
+
+        <div class="card" style="max-width: 600px;">
+          <div class="card-title">Manual Telemetry Override</div>
+          
+          <div style="margin-bottom:14px;">
+            <label style="font-size:0.8rem; color:var(--text-secondary);">Target Smart Bin:</label>
+            <select id="sim-bin-select" style="width:100%; padding:8px; background:var(--bg-surface-elevated); border:1px solid var(--border-muted); color:#fff; border-radius:6px; margin-top:4px;">
+              <option value="BIN-001">BIN-001 (Block A - Recyclable)</option>
+            </select>
+          </div>
+
+          <div style="margin-bottom:14px;">
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-secondary);">
+              <span>Fill Percentage:</span>
+              <span id="sim-fill-val" style="font-weight:600; color:#fff;">75%</span>
+            </div>
+            <input type="range" id="sim-fill-slider" min="0" max="100" value="75" style="width:100%;" oninput="document.getElementById('sim-fill-val').textContent = this.value + '%'">
+          </div>
+
+          <div style="margin-bottom:14px;">
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-secondary);">
+              <span>Load Cell Weight (kg):</span>
+              <span id="sim-wt-val" style="font-weight:600; color:#fff;">16.5 kg</span>
+            </div>
+            <input type="range" id="sim-weight-slider" min="0" max="40" step="0.5" value="16.5" style="width:100%;" oninput="document.getElementById('sim-wt-val').textContent = this.value + ' kg'">
+          </div>
+
+          <div style="margin-bottom:14px;">
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-secondary);">
+              <span>Temperature (°C):</span>
+              <span id="sim-temp-val" style="font-weight:600; color:#fff;">29°C</span>
+            </div>
+            <input type="range" id="sim-temp-slider" min="15" max="50" value="29" style="width:100%;" oninput="document.getElementById('sim-temp-val').textContent = this.value + '°C'">
+          </div>
+
+          <div style="margin-bottom:18px;">
+            <div style="display:flex; justify-content:space-between; font-size:0.8rem; color:var(--text-secondary);">
+              <span>Gas / Odor Index (ppm):</span>
+              <span id="sim-gas-val" style="font-weight:600; color:#fff;">95 ppm</span>
+            </div>
+            <input type="range" id="sim-gas-slider" min="20" max="400" value="95" style="width:100%;" oninput="document.getElementById('sim-gas-val').textContent = this.value + ' ppm'">
+          </div>
+
+          <button class="btn btn-primary" style="width:100%; justify-content:center;" onclick="sendManualTelemetry()">
+            <span>Push Simulated Telemetry</span>
+          </button>
+        </div>
+      </section>
+
+    </div>
+  </main>
+
+  <div class="toast-container" id="toast-container"></div>
+
+  <script src="/static/js/api.js"></script>
+  <script src="/static/js/scanner.js"></script>
+  <script src="/static/js/iot.js"></script>
+  <script src="/static/js/dashboard.js"></script>
+
+  <script>
+    document.getElementById("confidence-threshold-input")?.addEventListener("input", (e) => {
+      document.getElementById("threshold-val-display").textContent = `${Math.round(e.target.value * 100)}%`;
+    });
+  </script>
+</body>
+</html>

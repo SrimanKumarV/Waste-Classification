@@ -1,12 +1,23 @@
+import os
 from flask import Flask, request, render_template
-from tensorflow.keras.models import load_model
-from tensorflow.keras.preprocessing import image
+try:
+    import tf_keras as keras
+    from tf_keras.models import load_model
+    from tf_keras.preprocessing import image
+except ImportError:
+    from tensorflow.keras.models import load_model
+    from tensorflow.keras.preprocessing import image
 import numpy as np
 from io import BytesIO  # For file handling
 import base64
 
 app = Flask(__name__)
-model = load_model("best_model_multi.h5")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+model_path = os.path.join(BASE_DIR, "best_model_multi.h5")
+if not os.path.exists(model_path):
+    model_path = os.path.join(BASE_DIR, "best_model.h5")
+
+model = load_model(model_path)
 
 # Define your 12 classes in the same order as training
 class_names = [

@@ -66,3 +66,13 @@ audio_samples/
 Thumbs.db
 .vscode/
 .idea/
+
+# ==========================================
+# Databases & Local Uploads
+# ==========================================
+*.db
+*.sqlite
+*.sqlite3
+smart_waste/data/
+smart_waste/uploads/
+uploads/

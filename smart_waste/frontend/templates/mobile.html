@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>SmartWaste Mobile Auditor</title>
+  <link rel="stylesheet" href="/static/css/dashboard.css">
+  <style>
+    body {
+      background-color: #0b0f19;
+      display: block;
+      margin: 0;
+      padding-bottom: 70px;
+    }
+    .mobile-header {
+      background-color: var(--bg-surface);
+      padding: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid var(--border-subtle);
+      position: sticky;
+      top: 0;
+      z-index: 100;
+    }
+    .mobile-container {
+      padding: 16px;
+    }
+    .mobile-bottom-nav {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background-color: var(--bg-surface);
+      border-top: 1px solid var(--border-subtle);
+      display: flex;
+      justify-content: space-around;
+      padding: 10px 0;
+      z-index: 100;
+    }
+    .m-nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: var(--text-secondary);
+      font-size: 0.75rem;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .m-nav-item.active {
+      color: var(--accent-primary);
+      font-weight: 600;
+    }
+    .m-nav-item .icon {
+      font-size: 1.25rem;
+      margin-bottom: 2px;
+    }
+    .cam-btn-circle {
+      width: 68px;
+      height: 68px;
+      background: linear-gradient(135deg, #10b981, #059669);
+      border-radius: 50%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 28px;
+      color: #fff;
+      box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
+      margin: -24px auto 0 auto;
+      border: 3px solid #0b0f19;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+
+  <header class="mobile-header">
+    <div style="display:flex; align-items:center; gap:8px;">
+      <span style="font-size:22px;">♻️</span>
+      <strong style="font-size:1.1rem; color:#fff;">SmartWaste Mobile</strong>
+    </div>
+    <span class="badge-status status-NORMAL">Auditor Mode</span>
+  </header>
+
+  <div class="mobile-container">
+    
+    <!-- Home Tab -->
+    <div id="m-tab-home">
+      <!-- Mini KPIs -->
+      <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
+        <div class="kpi-card" style="padding:12px;">
+          <div class="kpi-label" style="font-size:0.7rem;">Efficiency</div>
+          <div class="kpi-value" id="m-kpi-efficiency" style="font-size:1.4rem;">87.4%</div>
+        </div>
+        <div class="kpi-card amber" style="padding:12px;">
+          <div class="kpi-label" style="font-size:0.7rem;">Contamination</div>
+          <div class="kpi-value" id="m-kpi-contam" style="font-size:1.4rem; color:var(--color-warning);">12.6%</div>
+        </div>
+      </div>
+
+      <!-- Quick Scan Card -->
+      <div class="card" style="text-align:center; padding:24px 16px;">
+        <h3 style="margin-bottom:6px;">Scan Waste Item</h3>
+        <p style="font-size:0.82rem; color:var(--text-secondary); margin-bottom:18px;">
+          Point camera at waste item to identify type and confirm correct bin disposal.
+        </p>
+        <button class="btn btn-primary" style="margin:0 auto; padding:12px 24px; font-size:1rem;" onclick="document.getElementById('mobile-camera-input').click()">
+          📷 Open Camera
+        </button>
+        <input type="file" id="mobile-camera-input" accept="image/*" capture="environment" style="display:none;" onchange="handleMobileScan(this.files[0])">
+      </div>
+
+      <!-- Nearby Bins -->
+      <div class="card" style="margin-top:16px;">
+        <div class="card-title">Nearby Campus Bins</div>
+        <div id="nearby-bins-list">
+          <div style="padding:10px 0; border-bottom:1px solid var(--border-subtle); display:flex; justify-content:space-between;">
+            <div>
+              <strong>BIN-001 (Recyclable)</strong>
+              <div style="font-size:0.75rem; color:var(--text-secondary);">Block A - Central Hall</div>
+            </div>
+            <span class="badge-status status-HIGH">82% Full</span>
+          </div>
+          <div style="padding:10px 0; display:flex; justify-content:space-between;">
+            <div>
+              <strong>BIN-003 (Organic)</strong>
+              <div style="font-size:0.75rem; color:var(--text-secondary);">Campus Food Court</div>
+            </div>
+            <span class="badge-status status-CRITICAL">94% Full</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Scan Result View -->
+    <div id="m-tab-scan-result" style="display:none;">
+      <div class="card">
+        <img id="m-preview-img" style="width:100%; max-height:220px; object-fit:contain; border-radius:8px; margin-bottom:12px;" alt="Scanned item">
+        
+        <div style="display:flex; justify-content:space-between; align-items:baseline;">
+          <h2 id="m-waste-type" style="font-size:1.6rem; font-weight:700;">PLASTIC</h2>
+          <span style="font-size:1.2rem; font-weight:700; color:var(--accent-primary);" id="m-confidence">94.6%</span>
+        </div>
+
+        <div class="bin-recommendation-box" id="m-rec-box" style="margin:14px 0;">
+          <span style="font-size:28px;">🗑️</span>
+          <div>
+            <div style="font-size:0.7rem; color:var(--text-muted);">RECOMMENDED BIN</div>
+            <strong id="m-rec-bin">Recyclable (Blue Bin)</strong>
+          </div>
+        </div>
+
+        <!-- Grad-CAM toggle -->
+        <div id="m-gradcam-box" style="margin:12px 0; display:none;">
+          <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:4px;">Grad-CAM Region Focus:</div>
+          <img id="m-gradcam-img" style="width:100%; border-radius:6px;" alt="Heatmap">
+        </div>
+
+        <h4 style="font-size:0.9rem; margin-top:16px;">Confirm Actual Bin Used:</h4>
+        <div style="display:flex; gap:6px; margin:10px 0;">
+          <button class="btn btn-outline" style="flex:1; padding:10px 4px; font-size:0.75rem;" onclick="submitMobileAudit('Recyclable (Blue Bin)')">
+            🟦 Blue
+          </button>
+          <button class="btn btn-outline" style="flex:1; padding:10px 4px; font-size:0.75rem;" onclick="submitMobileAudit('Organic (Green Bin)')">
+            🟩 Green
+          </button>
+          <button class="btn btn-outline" style="flex:1; padding:10px 4px; font-size:0.75rem;" onclick="submitMobileAudit('Hazardous (Red Bin)')">
+            🟥 Red
+          </button>
+        </div>
+
+        <div id="m-audit-status-badge" style="display:none; padding:10px; border-radius:6px; margin-top:12px; text-align:center; font-weight:600;"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Bottom Navigation -->
+  <nav class="mobile-bottom-nav">
+    <div class="m-nav-item active" onclick="showMTab('home')">
+      <span class="icon">🏠</span>
+      <span>Home</span>
+    </div>
+    <div class="cam-btn-circle" onclick="document.getElementById('mobile-camera-input').click()">
+      📷
+    </div>
+    <div class="m-nav-item" onclick="window.location.href='/'">
+      <span class="icon">🖥️</span>
+      <span>Desktop</span>
+    </div>
+  </nav>
+
+  <script src="/static/js/api.js"></script>
+  <script>
+    let currentMobilePred = null;
+
+    async function handleMobileScan(file) {
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (e) => {
+        document.getElementById("m-preview-img").src = e.target.result;
+      };
+      reader.readAsDataURL(file);
+
+      showMTab("scan-result");
+      document.getElementById("m-waste-type").textContent = "Analyzing...";
+
+      try {
+        const res = await API.predictWaste(file, 0.70, true);
+        currentMobilePred = res;
+
+        document.getElementById("m-waste-type").textContent = res.waste_class.toUpperCase();
+        document.getElementById("m-confidence").textContent = `${(res.confidence * 100).toFixed(1)}%`;
+        document.getElementById("m-rec-bin").textContent = res.recommended_bin;
+
+        if (res.explainability_url) {
+          document.getElementById("m-gradcam-img").src = res.explainability_url;
+          document.getElementById("m-gradcam-box").style.display = "block";
+        }
+      } catch (err) {
+        alert("Classification failed: " + err.message);
+      }
+    }
+
+    async function submitMobileAudit(actualBin) {
+      if (!currentMobilePred) return;
+
+      const auditData = {
+        waste_class: currentMobilePred.waste_class,
+        actual_bin: actualBin,
+        confidence: currentMobilePred.confidence,
+        location_id: 1,
+        bin_id: "BIN-001",
+        model_name: currentMobilePred.model_name
+      };
+
+      try {
+        const res = await API.recordAudit(auditData);
+        const badge = document.getElementById("m-audit-status-badge");
+        badge.style.display = "block";
+
+        if (res.segregation_status === "CORRECT") {
+          badge.style.backgroundColor = "rgba(16, 185, 129, 0.2)";
+          badge.style.color = "#10b981";
+          badge.textContent = "✅ Correct Segregation Logged!";
+        } else {
+          badge.style.backgroundColor = "rgba(239, 68, 68, 0.2)";
+          badge.style.color = "#ef4444";
+          badge.textContent = "❌ Contamination Logged (Wrong Bin)!";
+        }
+      } catch (err) {
+        alert("Failed to submit audit: " + err.message);
+      }
+    }
+
+    function showMTab(tabName) {
+      document.getElementById("m-tab-home").style.display = (tabName === "home") ? "block" : "none";
+      document.getElementById("m-tab-scan-result").style.display = (tabName === "scan-result") ? "block" : "none";
+    }
+
+    // Load initial KPIs
+    API.getOverview().then(k => {
+      document.getElementById("m-kpi-efficiency").textContent = `${k.segregation_efficiency_pct}%`;
+      document.getElementById("m-kpi-contam").textContent = `${k.contamination_rate_pct}%`;
+    }).catch(console.error);
+  </script>
+</body>
+</html>
